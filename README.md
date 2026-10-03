@@ -12,13 +12,7 @@ A Portuguese bank sells term deposits through phone campaigns. Only about 12% of
 
 The project follows one dataset through the full machine learning lifecycle, in five parts. Each part adds a clearly labelled section to a single, evolving Jupyter notebook.
 
-Project Status
-Part	Focus	Status
-Part 1	Data understanding, preprocessing and leakage-free pipeline	Complete
-Part 2	Naive Bayes vs decision tree baseline	Upcoming
-Part 3	Ensembles, regularization and hyperparameter optimisation	Upcoming
-Part 4	Neural network, unsupervised learning, interpretability and fairness	Upcoming
-Part 5	Final integration, written report and viva	Upcoming
+
 Dataset
 Source: UCI Machine Learning Repository, Bank Marketing (file used: bank-full.csv)
 Size: 45,211 clients, 16 input features and one target
