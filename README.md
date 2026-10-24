@@ -22,7 +22,7 @@ The project follows one dataset through the full machine learning lifecycle, in 
 | Part | Focus | Status |
 |---|---|---|
 | **Part 1** | Data understanding, preprocessing and leakage-free pipeline | Complete |
-| Part 2 | Naive Bayes vs decision tree baseline | Upcoming |
+| **Part 2** | Naive Bayes vs decision tree baseline | Complete |
 | Part 3 | Ensembles, regularization and hyperparameter optimisation | Upcoming |
 | Part 4 | Neural network, unsupervised learning, interpretability and fairness | Upcoming |
 | Part 5 | Final integration, written report and viva | Upcoming |
@@ -87,17 +87,35 @@ The notebook contains five visualisations, each with a written finding:
 4. Share of missing values per column
 5. Correlation heatmap of numeric features
 
-## Repository Structure
+## Part 2: Naive Bayes vs Decision Tree Baseline
 
-```
-ML-Preprocessing/
-├── ML_Project_Part1.ipynb      # Project notebook (Part 1 complete)
-├── bank/
-│   └── bank-full.csv           # UCI Bank Marketing dataset
-├── docs/
-│   └── ML_Project_Proposal.pdf # One-page project proposal
-├── requirements.txt            # Python dependencies
-└── README.md
+Part 2 trains and compares probabilistic and tree-based models on the Part 1 data, using the same stratified 5-fold cross-validation folds for every model. The test set remains untouched.
+
+**Models:** Gaussian Naive Bayes, Categorical Naive Bayes (discretised features; natural and uniform class priors), an unrestricted decision tree, a depth-limited decision tree, and a decision tree whose depth is tuned with nested cross-validation, all compared with a majority-class baseline.
+
+**Hand-worked split:** information gain (0.1621 bits) and Gini gain (0.1013) for the split `poutcome == "success"` on a 20-client sample, verified in code and then checked against the root split chosen by scikit-learn on the full training set.
+
+### Cross-Validation Results
+
+| Model | Accuracy | Precision | Recall | F1 | ROC-AUC | PR-AUC |
+|---|---|---|---|---|---|---|
+| Majority-class baseline | 0.883 | 0.000 | 0.000 | 0.000 | 0.500 | 0.117 |
+| Gaussian NB | 0.828 | 0.330 | 0.458 | 0.383 | 0.740 | 0.334 |
+| Categorical NB | 0.871 | 0.435 | 0.355 | 0.391 | 0.752 | 0.375 |
+| Categorical NB (uniform priors) | 0.725 | 0.243 | 0.637 | 0.352 | 0.752 | 0.375 |
+| Decision tree (unlimited depth) | 0.837 | 0.306 | 0.310 | 0.308 | 0.608 | 0.176 |
+| Decision tree (max_depth=8) | 0.810 | 0.328 | 0.572 | 0.415 | 0.754 | 0.372 |
+| Decision tree (depth tuned, nested CV) | 0.815 | 0.337 | 0.561 | 0.418 | 0.752 | 0.362 |
+
+### Key Findings
+
+- Accuracy is misleading: the majority-class baseline has the highest accuracy (88.3%) while finding no subscribers.
+- Categorical NB and the depth-tuned decision tree are effectively tied on ranking quality (ROC-AUC about 0.75, PR-AUC about 0.37); the difference is smaller than the fold-to-fold variation.
+- An unrestricted tree overfits badly (training ROC-AUC 1.0, validation about 0.61). Validation performance peaks at a depth of about 8.
+- Categorical NB outperforms Gaussian NB because discretisation suits skewed and categorical features.
+- The outcome of the previous campaign (`poutcome`) is the strongest signal and is the root split of the tree.
+- The tree reaches higher recall and F1 largely through class weighting (a threshold effect); Naive Bayes is faster and more stable, and the tree is easier to explain as rules.
+
 ```
 
 ## How to Run
@@ -114,15 +132,14 @@ ML-Preprocessing/
 3. Make sure the dataset is at `bank/bank-full.csv` (included in the repository). The notebook loads it from there.
 4. Launch Jupyter and run the notebook from top to bottom:
    ```bash
-   jupyter notebook ML_Project_Part1.ipynb
+   jupyter notebook ML_Project.ipynb
    ```
 
-Random seeds are fixed (`random_state=42`), so results are reproducible.
 
 ## Limitations
 
 - The dataset is ordered roughly by time, but a stratified random split was used. A deployed model would predict future campaigns from past ones, so a time-based split would be a more realistic evaluation.
-- The baseline estimator is intentionally simple. Model comparison begins in Part 2.
+- Models in Part 2 use default or lightly tuned settings; thresholds are not tuned and imbalance is handled only through class weights and priors. Part 3 addresses ensembles, regularization and systematic hyperparameter optimisation.
 
 ## References
 
